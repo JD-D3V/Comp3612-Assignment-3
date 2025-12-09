@@ -7,11 +7,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* Data loading from json */
-const jsonPathArtiists = path.join(__dirname, 'data', 'artists.json');
+const jsonPathArtists = path.join(__dirname, 'data', 'artists.json');
 const jsonPathGalleries = path.join(__dirname, 'data', 'galleries.json');
 const jsonPathPaintings = path.join(__dirname, 'data', 'paintings-nested.json');
 
-const artists = JSON.parse(fs.readFileSync(jsonPathArtiists, 'utf8'));
+const artists = JSON.parse(fs.readFileSync(jsonPathArtists, 'utf8'));
 const galleries = JSON.parse(fs.readFileSync(jsonPathGalleries, 'utf8'));
 const paintings = JSON.parse(fs.readFileSync(jsonPathPaintings, 'utf8'));
 
@@ -25,32 +25,35 @@ app.get('/api/paintings', (req, res) => {
 
 // /api/painting/id
 // Return JSON for a single painting
-app.get('/api/paintings/:id', (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const matches = paintings.filter( p => p.gallery.galleryID === id );
-    if (matches.length > 0) {
-        res.json(matches[0]);
+app.get('/api/painting/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const match = paintings.find(p => p.paintingID === id);
+
+    if (match.length > 0) {
+        res.json(match);
     } else {
-        res.status(404).json({ message: 'No paintings found for this gallery ID' });
+        res.status(404).json({ message: 'No paintings found for that ID' });
     }
 });
 
 // /api/painting/gallery/id
-// Returns paintings matching with the provides artist ID
-app.get('/api/painting/artist/:id', (req, res) => {
-
-
-
+// Returns paintings matching with the provided artist ID
+app.get('/api/painting/gallery/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const match = paintings.filter(p => p.gallery.galleryID === id);
+    if (match.length > 0){
+        res.json(match);
+    } else {
+        res.status(404).json({message: 'No painting was found for this artist id'});
+    }
 });
-
-
 
 // /api/painting/year/min/max
 app.get( '/api/painting/year/:min/:max', (req, res) => {
     const min = parseInt(req.params.min);
     const max = parseInt(req.params.max);
     const matches = paintings.filter( p => p.yearOfWork >= min && p.yearOfWork <= max);
-    if (matches.lenmgth > 0) {
+    if (matches.length > 0) {
         res.json(matches);
     } else {
         res.status(404).json({ message: 'No paintings found in this year range' });
@@ -61,10 +64,62 @@ app.get( '/api/painting/year/:min/:max', (req, res) => {
 // /api/painting/title/text
 app.get('/api/painting/title/:text', (req,res) => {
     const text = req.params.text.toLowerCase();
-    const match 
-})
+    const matches = paintings.filter( p => p.title.toLowerCase().includes(text));
+    if (matches.length > 0) {
+        res.json(matches);
+    } else {
+        res.status(404).json({ message: 'No paintings found with this title' });
+    }
+});
 // /api/painting/color/name 
+app.get('/api/painting/color/:name', (req, res) => {
+    const searchColor = req.params.name.toLowerCase();
+    const match = paintings.filter(p => {
+        // Find the color array in JSON
+        const colors = p.details.annotation.dominatColors;
+        // Check if any colors in that array match our search
+        return colors.some(c => c.name.toLowerCase() === searchColor);
+    })
+    if (match.length > 0 ){
+        res.json(match);
+    } else {
+        res.status(404).json({message: 'No paintings found with this color'})
+    }
+    
+});
+
+
 // /api/artists
+app.get('/api/artists', (req,res) => {
+    res.json(artists);
+});
 // /api/artists/country
+app.get('/api/artists/:country', (req,res) => {
+    const country = req.params.country.toLowerCase();
+    
+    const match = artists.filter(a => a.Nationality.toLowerCase() === country)
+    if (match.length > 0 ){
+        res.json(match);
+    } else {
+        res.status(404).json({message: 'No paintings found with this color'})
+    }
+});
 // /api/galleries
+app.get('/api/galleries', (req,res) => {
+    res.json(galleries);
+});
 // /api/galleries/country
+app.get('/api/galleries/:country', (req,res) => {
+    const country = req.params.country.toLowerCase();
+
+    const match = galleries.filter(g => g.GalleryCountry.toLowerCase() === country);
+    if (match.length > 0 ){
+        res.json(match);
+    } else {
+        res.status(404).json({message: 'No paintings found with this color'})
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running at port ${PORT}`);
+});
