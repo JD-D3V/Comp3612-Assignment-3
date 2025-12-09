@@ -18,9 +18,8 @@ const paintings = JSON.parse(fs.readFileSync(jsonPathPaintings, 'utf8'));
 /* painting api routing */
 
 // /api/paintings
-// Return JSON for all paintings
 app.get('/api/paintings', (req, res) => {
-    res.json(paintings);
+    res.json(paintings); // Return JSON for all paintings
 });
 
 // /api/painting/id
