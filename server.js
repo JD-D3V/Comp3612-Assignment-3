@@ -49,11 +49,20 @@ app.get('/api/painting/artist/:id', (req, res) => {
 app.get( '/api/painting/year/:min/:max', (req, res) => {
     const min = parseInt(req.params.min);
     const max = parseInt(req.params.max);
-
+    const matches = paintings.filter( p => p.yearOfWork >= min && p.yearOfWork <= max);
+    if (matches.lenmgth > 0) {
+        res.json(matches);
+    } else {
+        res.status(404).json({ message: 'No paintings found in this year range' });
+    }
 
 });
 
 // /api/painting/title/text
+app.get('/api/painting/title/:text', (req,res) => {
+    const text = req.params.text.toLowerCase();
+    const match 
+})
 // /api/painting/color/name 
 // /api/artists
 // /api/artists/country
