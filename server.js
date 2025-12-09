@@ -29,7 +29,7 @@ app.get('/api/painting/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const match = paintings.find(p => p.paintingID === id);
 
-    if (match.length > 0) {
+    if (match) {
         res.json(match);
     } else {
         res.status(404).json({ message: 'No paintings found for that ID' });
@@ -48,6 +48,17 @@ app.get('/api/painting/gallery/:id', (req, res) => {
     }
 });
 
+// /api/painting/artist/id
+app.get('/api/painting/artist/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const matches = paintings.filter(p => p.artist.artistID === id);
+
+    if (matches.length > 0) {
+        res.json(matches);
+    } else {
+        res.status(404).json({ message: 'No paintings found for this artist id' });
+    }
+});
 // /api/painting/year/min/max
 app.get( '/api/painting/year/:min/:max', (req, res) => {
     const min = parseInt(req.params.min);
@@ -76,7 +87,7 @@ app.get('/api/painting/color/:name', (req, res) => {
     const searchColor = req.params.name.toLowerCase();
     const match = paintings.filter(p => {
         // Find the color array in JSON
-        const colors = p.details.annotation.dominatColors;
+        const colors = p.details.annotation.dominantColors;
         // Check if any colors in that array match our search
         return colors.some(c => c.name.toLowerCase() === searchColor);
     })
@@ -87,7 +98,6 @@ app.get('/api/painting/color/:name', (req, res) => {
     }
     
 });
-
 
 // /api/artists
 app.get('/api/artists', (req,res) => {
@@ -101,7 +111,7 @@ app.get('/api/artists/:country', (req,res) => {
     if (match.length > 0 ){
         res.json(match);
     } else {
-        res.status(404).json({message: 'No paintings found with this color'})
+        res.status(404).json({message: 'No artists found for this country'})
     }
 });
 // /api/galleries
@@ -116,7 +126,7 @@ app.get('/api/galleries/:country', (req,res) => {
     if (match.length > 0 ){
         res.json(match);
     } else {
-        res.status(404).json({message: 'No paintings found with this color'})
+        res.status(404).json({message: 'No galleries found for this country'})
     }
 });
 
